@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal - COMPUTER SERVICE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+  <!-- Login Screen -->
+  <div id="loginScreen" class="max-w-md mx-auto p-8 pt-20">
+    <h1 class="text-4xl font-bold text-center mb-8">Admin Login</h1>
+    <input id="password" type="password" placeholder="Enter admin password" 
+           class="w-full p-5 border-2 rounded-3xl text-xl">
+    <button onclick="login()" 
+            class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-3xl font-bold text-xl">LOGIN</button>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="adminPanel" class="hidden max-w-6xl mx-auto p-6">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-4xl font-bold">Admin Portal - COMPUTER SERVICE</h1>
+      <button onclick="logout()" class="text-red-600 font-bold flex items-center gap-2">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
+
+    <!-- Create New Job -->
+    <div class="bg-white p-8 rounded-3xl shadow-xl mb-12">
+      <h2 class="text-3xl font-semibold mb-6">Create New Service Job</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <input id="custName" placeholder="Customer Full Name" class="p-5 border-2 rounded-3xl text-lg">
+        <input id="custPhone" placeholder="WhatsApp Number (e.g. 919876543210)" class="p-5 border-2 rounded-3xl text-lg">
+        <input id="productType" placeholder="Product (Laptop / Desktop / Printer)" class="p-5 border-2 rounded-3xl text-lg">
+        <input id="productDetails" placeholder="Brand & Model" class="p-5 border-2 rounded-3xl text-lg">
+        <textarea id="complaint" placeholder="Customer Complaint / Service Required" rows="3" 
+                  class="p-5 border-2 rounded-3xl text-lg md:col-span-2"></textarea>
+      </div>
+      <button onclick="createJob()" 
+              class="mt-8 w-full bg-green-600 hover:bg-green-700 text-white py-6 rounded-3xl font-bold text-2xl">
+        CREATE JOB & SEND WHATSAPP
+      </button>
+    </div>
+
+    <!-- All Jobs -->
+    <h2 class="text-2xl font-semibold mb-4">All Active Jobs</h2>
+    <div id="jobsList" class="space-y-6"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1k-rDdMj3hhijd9SppRUmxDbtlQ9dkzw",
+      authDomain: "computer-service-shop-a2d53.firebaseapp.com",
+      projectId: "computer-service-shop-a2d53",
+      storageBucket: "computer-service-shop-a2d53.firebasestorage.app",
+      messagingSenderId: "305071975028",
+      appId: "1:305071975028:web:79500e7c912a60f6d9bf21"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const ADMIN_PASSWORD = "admin@123";
+
+    async function login() {
+      if (document.getElementById('password').value === ADMIN_PASSWORD) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        loadJobs();
+      } else {
+        alert("❌ Wrong password!");
+      }
+    }
+
+    function logout() {
+      location.reload();
+    }
+
+    async function createJob() {
+      const jobNumber = "CS-" + Math.floor(100000 + Math.random() * 900000);
+
+      const jobData = {
+        jobNumber: jobNumber,
+        customerName: document.getElementById('custName').value.trim(),
+        customerPhone: document.getElementById('custPhone').value.trim(),
+        productType: document.getElementById('productType').value.trim(),
+        productDetails: document.getElementById('productDetails').value.trim(),
+        complaint: document.getElementById('complaint').value.trim(),
+        status: "Received",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      if (!jobData.customerName || !jobData.customerPhone) {
+        alert("Customer name and WhatsApp number are required!");
+        return;
+      }
+
+      await db.collection('jobs').add(jobData);
+
+      alert(`✅ Job Created Successfully!\nJob Number: ${jobNumber}\n\nNow sending WhatsApp...`);
+
+      const waText = encodeURIComponent(
+        `Hello ${jobData.customerName} 👋\n\n` +
+        `Your service job has been registered at COMPUTER SERVICE.\n\n` +
+        `🔖 Job Number: ${jobNumber}\n` +
+        `🖥️ Product: ${jobData.productType} - ${jobData.productDetails}\n` +
+        `📝 Issue: ${jobData.complaint}\n` +
+        `📌 Current Status: Received\n\n` +
+        `Track live status here 👇\n` +
+        `${window.location.origin}/customer.html?job=${jobNumber}\n\n` +
+        `Reply to this chat for any questions.`
+      );
+
+      const waLink = `https://wa.me/${jobData.customerPhone}?text=${waText}`;
+      window.open(waLink, "_blank");
+
+      document.getElementById('custName').value = '';
+      document.getElementById('custPhone').value = '';
+      document.getElementById('productType').value = '';
+      document.getElementById('productDetails').value = '';
+      document.getElementById('complaint').value = '';
+      loadJobs();
+    }
+
+    async function loadJobs() {
+      const snapshot = await db.collection('jobs').orderBy('createdAt', 'desc').get();
+      const container = document.getElementById('jobsList');
+      container.innerHTML = '';
+
+      if (snapshot.empty) {
+        container.innerHTML = `<p class="text-center text-gray-500 py-12">No jobs yet. Create one above.</p>`;
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const j = doc.data();
+        const div = document.createElement('div');
+        div.className = "bg-white p-6 rounded-3xl shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4";
+        div.innerHTML = `
+          <div class="flex-1">
+            <div class="font-mono text-2xl font-bold">${j.jobNumber}</div>
+            <div class="text-gray-700">${j.customerName} • ${j.productType}</div>
+            <div class="text-sm text-gray-500">${j.complaint.substring(0, 60)}...</div>
+          </div>
+          <div class="flex items-center gap-4">
+            <span onclick="updateStatus('${doc.id}', '${j.status}')" 
+                  class="cursor-pointer px-8 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-3xl font-semibold text-xl">
+              ${j.status}
+            </span>
+            <button onclick="sendWhatsAppUpdate('${doc.id}')" 
+                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-3xl text-2xl flex items-center gap-2">
+              <i class="fa-brands fa-whatsapp"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function updateStatus(docId, currentStatus) {
+      const newStatus = prompt("Update status to one of these:\n\nReceived, In Progress, Repairing, Testing, Ready, Completed\n\nCurrent: " + currentStatus, currentStatus);
+      if (!newStatus) return;
+
+      await db.collection('jobs').doc(docId).update({
+        status: newStatus,
+        updatedAt: new Date().toISOString()
+      });
+
+      alert("✅ Status updated!");
+      loadJobs();
+    }
+
+    async function sendWhatsAppUpdate(docId) {
+      const doc = await db.collection('jobs').doc(docId).get();
+      const j = doc.data();
+
+      const waText = encodeURIComponent(
+        `Hello ${j.customerName} 👋\n\n` +
+        `Update on your service job:\n\n` +
+        `🔖 Job Number: ${j.jobNumber}\n` +
+        `🖥️ Product: ${j.productType} - ${j.productDetails}\n` +
+        `📌 New Status: ${j.status}\n\n` +
+        `Track live here 👇\n` +
+        `${window.location.origin}/customer.html?job=${j.jobNumber}`
+      );
+
+      const waLink = `https://wa.me/${j.customerPhone}?text=${waText}`;
+      window.open(waLink, "_blank");
+    }
+  </script>
+</body>
+</html>

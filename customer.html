@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Service - COMPUTER SERVICE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+  <div class="max-w-2xl mx-auto p-6">
+    <h1 class="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-3">
+      <i class="fa-solid fa-magnifying-glass"></i> Track Your Service
+    </h1>
+
+    <div id="form" class="bg-white p-8 rounded-3xl shadow-lg">
+      <input id="jobInput" type="text" placeholder="Enter Job Number (e.g. CS-123456)" 
+             class="w-full p-5 border-2 rounded-2xl text-xl focus:border-blue-500 focus:outline-none">
+      <button onclick="checkStatus()" 
+              class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-5 rounded-2xl font-bold text-xl">
+        CHECK STATUS
+      </button>
+    </div>
+
+    <div id="result" class="hidden bg-white p-8 rounded-3xl shadow-lg mt-8"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1k-rDdMj3hhijd9SppRUmxDbtlQ9dkzw",
+      authDomain: "computer-service-shop-a2d53.firebaseapp.com",
+      projectId: "computer-service-shop-a2d53",
+      storageBucket: "computer-service-shop-a2d53.firebasestorage.app",
+      messagingSenderId: "305071975028",
+      appId: "1:305071975028:web:79500e7c912a60f6d9bf21"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    window.onload = () => {
+      const params = new URLSearchParams(window.location.search);
+      const jobFromUrl = params.get('job');
+      if (jobFromUrl) {
+        document.getElementById('jobInput').value = jobFromUrl;
+        checkStatus();
+      }
+    };
+
+    async function checkStatus() {
+      const jobNumber = document.getElementById('jobInput').value.trim().toUpperCase();
+      if (!jobNumber) return alert("Please enter Job Number");
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.classList.remove('hidden');
+      resultDiv.innerHTML = `<p class="text-center py-8 text-lg">Searching...</p>`;
+
+      const snapshot = await db.collection('jobs').where('jobNumber', '==', jobNumber).get();
+      
+      if (snapshot.empty) {
+        resultDiv.innerHTML = `<p class="text-red-600 text-center text-2xl py-8">❌ No job found with this number.</p>`;
+        return;
+      }
+
+      const job = snapshot.docs[0].data();
+      resultDiv.innerHTML = `
+        <div class="space-y-6">
+          <div class="flex justify-between">
+            <h2 class="text-3xl font-bold">Job #${job.jobNumber}</h2>
+            <span class="px-6 py-3 bg-green-100 text-green-700 rounded-3xl text-2xl font-semibold">${job.status}</span>
+          </div>
+          <p><strong>Customer:</strong> ${job.customerName}</p>
+          <p><strong>Product:</strong> ${job.productType} — ${job.productDetails}</p>
+          <p><strong>Issue:</strong> ${job.complaint}</p>
+          <p class="text-sm text-gray-500">Last updated: ${new Date(job.updatedAt).toLocaleString('en-IN')}</p>
+          
+          <button onclick="openShopWhatsApp()" 
+                  class="w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-3xl font-bold text-xl flex items-center justify-center gap-3">
+            <i class="fa-brands fa-whatsapp text-3xl"></i>
+            CHAT WITH SHOP ON WHATSAPP
+          </button>
+        </div>
+      `;
+    }
+
+    function openShopWhatsApp() {
+      const shopNumber = "917907502401";
+      const msg = encodeURIComponent("Hello, I want to know the status of my service job.");
+      window.open(`https://wa.me/${shopNumber}?text=${msg}`, "_blank");
+    }
+  </script>
+</body>
+</html>
