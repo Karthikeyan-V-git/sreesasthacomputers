@@ -4,46 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>COMPUTER SERVICE - Sree Sastha Computers</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script>
-    // Force Tailwind to initialize
-    function initTailwind() {
-      tailwind.config = {
-        content: [],
-        theme: { extend: {} }
-      }
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; margin: 0; padding: 0; }
+    .container { max-width: 1000px; margin: 40px auto; padding: 20px; }
+    h1 { color: #1e40af; font-size: 42px; font-weight: 800; text-align: center; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: #475569; font-size: 18px; margin-bottom: 40px; }
+    .card { 
+      background: white; border-radius: 20px; padding: 40px 30px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; 
+      transition: all 0.3s; border: 3px solid #e2e8f0;
     }
-  </script>
+    .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); border-color: #3b82f6; }
+    .blue-card { border-color: #3b82f6; }
+    .btn { padding: 16px 32px; font-size: 18px; font-weight: 600; border-radius: 9999px; }
+  </style>
 </head>
-<body class="bg-gray-50 font-sans">
-  <div class="max-w-4xl mx-auto p-6 min-h-screen flex flex-col justify-center">
-    <h1 class="text-5xl font-bold text-blue-600 text-center mb-2">COMPUTER SERVICE</h1>
-    <p class="text-center text-xl text-gray-600 mb-10">Fast • Reliable • Affordable Laptop & PC Repair<br>Thiruvananthapuram, Kerala</p>
+<body>
+  <div class="container">
+    <h1>COMPUTER SERVICE</h1>
+    <p class="subtitle">Fast • Reliable • Affordable Laptop & PC Repair<br>Thiruvananthapuram, Kerala</p>
     
-    <div class="grid md:grid-cols-2 gap-6">
-      <a href="customer.html" class="bg-white p-10 rounded-3xl shadow-lg hover:shadow-2xl transition text-center border-4 border-blue-500 flex flex-col items-center">
-        <i class="fa-solid fa-magnifying-glass text-7xl text-blue-600 mb-6"></i>
-        <h2 class="text-3xl font-bold mb-2">Track Your Service</h2>
-        <p class="text-gray-600">Enter Job Number to see live status</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px;">
+      <a href="customer.html" class="card blue-card">
+        <i class="fa-solid fa-magnifying-glass" style="font-size: 60px; color: #2563eb; margin-bottom: 20px;"></i>
+        <h2 style="font-size: 28px; margin: 15px 0;">Track Your Service</h2>
+        <p style="color: #64748b; font-size: 17px;">Enter Job Number to see live status</p>
       </a>
       
-      <a href="admin.html" class="bg-white p-10 rounded-3xl shadow-lg hover:shadow-2xl transition text-center border-4 border-gray-300 flex flex-col items-center">
-        <i class="fa-solid fa-user-shield text-7xl text-gray-700 mb-6"></i>
-        <h2 class="text-3xl font-bold mb-2">Admin Portal</h2>
-        <p class="text-gray-600">Staff only - Create & update jobs</p>
+      <a href="admin.html" class="card">
+        <i class="fa-solid fa-user-shield" style="font-size: 60px; color: #475569; margin-bottom: 20px;"></i>
+        <h2 style="font-size: 28px; margin: 15px 0;">Admin Portal</h2>
+        <p style="color: #64748b; font-size: 17px;">Staff only - Create & update jobs</p>
       </a>
     </div>
 
-    <div class="mt-auto text-center text-sm text-gray-500 pt-12">
+    <div style="text-align: center; margin-top: 60px; color: #64748b;">
       📍 Thiruvananthapuram, Kerala<br>
-      📱 WhatsApp: 7907502401
+      📱 WhatsApp: <a href="https://wa.me/917907502401" style="color: #22c55e; text-decoration: none;">7907502401</a>
     </div>
   </div>
-
-  <script>
-    // Initialize Tailwind after page loads
-    window.onload = initTailwind;
-  </script>
 </body>
 </html>
